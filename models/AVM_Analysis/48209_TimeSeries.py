@@ -5,6 +5,7 @@ import requests
 import json
 import logging
 import os
+import matplotlib.pyplot as plt
 #%%
 logger = logging.getLogger(__name__)
 #%%
@@ -66,23 +67,29 @@ from collections import Counter
 street_set=set(street_keys)
 street_counter=Counter(street_keys)
 #%%
-miller_ln_keys=[]
+def street_fn(string):
+    starray=string.split(' ')
+    starray=tuple(starray[1:])
+    ans=' '.join(starray)
+    return ans
+#%%
+master_keys=dict()
+for i in street_keys:
+    master_keys[i]=[]
 for i in list_keys:
-    if 'MILLER LN' in i:
-        miller_ln_keys.append(i)
+    ans=street_fn(i)
+    master_keys[ans].append(i)
 #%%
-miller_ln_dod=dict()
-for i in miller_ln_keys:
-    miller_ln_dod[i]=dict_of_timeseries[i]
+master_key_dod=dict()
+for i in street_keys:
+    master_key_dod[i]=dict()
+    for j in master_keys[i]:
+        master_key_dod[i][j]=dict_of_timeseries[j]
+        master_key_dod[i][j]=sorted(master_key_dod[i][j], key=lambda x:x['valuation_date'])
 #%%
-for i in miller_ln_dod.keys():
-    miller_ln_dod[i]=sorted(miller_ln_dod[i], key=lambda i:i[
-        'valuation_date'])
+raw_street_data=json.dumps(master_key_dod)
+text_file=open("Street_Data_48209.txt", "w")
+n=text_file.write(raw_street_data)
+text_file.close()
 #%%
-for i in miller_ln_dod.keys():
-    print ('\n\n', i, '\n\n')
-    for j in miller_ln_dod[i]:
-        print (j['valuation_date'], ' ', j['estimated_value_amount'])
-#%%
-    
-    
+
